@@ -1,9 +1,5 @@
 # Change Log
-
-All notable changes to the "payjar-" extension will be documented in this file.
-
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-
-## [Unreleased]
-
-- Initial release
+ version 0.1.0:
+- first version 
+## Releases
+- 0.1.0 6.11.25 21:00 UTC+1:100
