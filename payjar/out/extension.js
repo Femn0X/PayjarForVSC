@@ -38,7 +38,6 @@ exports.deactivate = deactivate;
 // Imports from VS Code API and your custom language logic
 const vscode = __importStar(require("vscode"));
 const payjar_1 = require("./payjar"); // Import your logic
-const esolang_1 = require("./esolang");
 // Define the file extension for your language (e.g., .payjar)
 const PAYJAR_LANGUAGE_ID = 'payjar';
 /**
@@ -62,6 +61,8 @@ function activate(context) {
             outputChannel.clear();
             outputChannel.show(true);
             outputChannel.appendLine(`--- Running PayJar Code ---`);
+            // Keep a reference to the original console.log so we can restore it later
+            const originalConsoleLog = console.log;
             try {
                 // 1. Lexing
                 const lexer = new payjar_1.Lexer(code);
@@ -72,57 +73,23 @@ function activate(context) {
                 // 3. Interpretation
                 const interpreter = new payjar_1.Interpreter();
                 // IMPORTANT: Redirect console.log from the interpreter to the VS Code output channel
-                const originalConsoleLog = console.log;
                 console.log = (...args) => {
                     outputChannel.appendLine(args.map(String).join(' '));
                 };
                 interpreter.interpret(ast);
-                // Restore original console.log
-                console.log = originalConsoleLog;
                 outputChannel.appendLine(`--- Execution Finished Successfully ---`);
             }
             catch (error) {
                 outputChannel.appendLine(`--- Execution FAILED ---`);
-                outputChannel.appendLine(`Error: ${error.message}`);
-                // Restore original console.log in case of error
+                outputChannel.appendLine(`Error: ${error?.message ?? String(error)}`);
+            }
+            finally {
+                // Always restore the original console implementation
                 console.log = originalConsoleLog;
             }
         }
     });
     context.subscriptions.push(runCommand);
-    // --- 3. Register "Run Esolang Code" Command ---
-    const runEsolangCmd = vscode.commands.registerCommand('esolangs.runCode', () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor)
-            return;
-        const document = editor.document;
-        // Accept .bf files or files with language id 'brainfuck'
-        if (!document.fileName.endsWith('.bf') && document.languageId !== 'brainfuck') {
-            vscode.window.showWarningMessage('The active file is not a Brainfuck (.bf) file.');
-            return;
-        }
-        const code = document.getText();
-        const outputChannel = vscode.window.createOutputChannel('Esolangs Output');
-        outputChannel.clear();
-        outputChannel.show(true);
-        outputChannel.appendLine(`--- Running Brainfuck Code ---`);
-        try {
-            const runner = new esolang_1.EsolangRunner({ code, language: 'brainfuck' });
-            const result = runner.run();
-            if (result.length === 0) {
-                outputChannel.appendLine('(No output)');
-            }
-            else {
-                outputChannel.appendLine(result);
-            }
-            outputChannel.appendLine(`--- Execution Finished Successfully ---`);
-        }
-        catch (e) {
-            outputChannel.appendLine(`--- Execution FAILED ---`);
-            outputChannel.appendLine(e.message || String(e));
-        }
-    });
-    context.subscriptions.push(runEsolangCmd);
     // --- 2. Basic Diagnostics (Error Checking) ---
     const diagnosticCollection = vscode.languages.createDiagnosticCollection('payjar');
     context.subscriptions.push(diagnosticCollection);

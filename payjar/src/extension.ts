@@ -29,6 +29,9 @@ export function activate(context: vscode.ExtensionContext) {
             outputChannel.show(true);
             outputChannel.appendLine(`--- Running PayJar Code ---`);
 
+            // Keep a reference to the original console.log so we can restore it later
+            const originalConsoleLog = console.log;
+
             try {
                 // 1. Lexing
                 const lexer = new Lexer(code);
@@ -40,25 +43,22 @@ export function activate(context: vscode.ExtensionContext) {
 
                 // 3. Interpretation
                 const interpreter = new Interpreter();
-                
+
                 // IMPORTANT: Redirect console.log from the interpreter to the VS Code output channel
-                const originalConsoleLog = console.log;
-                console.log = (...args) => {
+                console.log = (...args: any[]) => {
                     outputChannel.appendLine(args.map(String).join(' '));
                 };
 
                 interpreter.interpret(ast);
 
-                // Restore original console.log
-                console.log = originalConsoleLog;
-
                 outputChannel.appendLine(`--- Execution Finished Successfully ---`);
 
             } catch (error: any) {
                 outputChannel.appendLine(`--- Execution FAILED ---`);
-                outputChannel.appendLine(`Error: ${error.message}`);
-                // Restore original console.log in case of error
-                console.log = originalConsoleLog; 
+                outputChannel.appendLine(`Error: ${error?.message ?? String(error)}`);
+            } finally {
+                // Always restore the original console implementation
+                console.log = originalConsoleLog;
             }
         }
     });

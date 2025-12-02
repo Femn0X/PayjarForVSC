@@ -506,7 +506,7 @@ export class Parser {
         // Simplified body parsing
         const members: ASTNode[] = [];
         const methods: ASTNode[] = [];
-        let constructor: ASTNode | null = null;
+        let ctor: ASTNode | null = null;
         
         while (this.current_token && this.current_token.type !== 'RBRACE') {
             if (['CONST', 'LET'].includes(this.current_token.type)) {
@@ -514,7 +514,7 @@ export class Parser {
             } else if (this.current_token.type === 'DEF') {
                 const methodDef = this.parseFunctionDefinition(true); // is_method = true
                 if (methodDef.name === 'init') {
-                    constructor = methodDef;
+                    ctor = methodDef;
                 } else {
                     methods.push(methodDef);
                 }
@@ -523,7 +523,7 @@ export class Parser {
             }
         }
         this.eat('RBRACE');
-        return { type: "class_definition", name: className, fields: members, methods: methods, constructor: constructor };
+        return { type: "class_definition", name: className, fields: members, methods: methods, ctor: ctor };
     }
 
     private parseClassFieldDeclaration(): ASTNode {
@@ -881,17 +881,17 @@ export class Interpreter {
 
         // Map methods
         for (const methodNode of classDefinition.methods) {
-            methodNode.is_method = true;
-            instanceMethods[methodNode.name] = methodNode;
+            (methodNode as any).is_method = true;
+            instanceMethods[(methodNode as any).name] = methodNode;
         }
 
         const instance = new PayJarObject(className, instanceFields, instanceMethods);
 
         // Execute constructor (init method)
-        if (classDefinition.constructor) {
-            const constructorNode = classDefinition.constructor;
-            constructorNode.is_method = true; 
-            const expectedConstructorParams = constructorNode.parameters as string[];
+        if (classDefinition.ctor) {
+            const constructorNode = classDefinition.ctor;
+            (constructorNode as any).is_method = true;
+            const expectedConstructorParams = (constructorNode as any).parameters as string[];
             
             // Check for 'self' parameter
             if (!expectedConstructorParams || expectedConstructorParams[0] !== 'self') {

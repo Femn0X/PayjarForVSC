@@ -518,7 +518,7 @@ class Parser {
         // Simplified body parsing
         const members = [];
         const methods = [];
-        let constructor = null;
+        let ctor = null;
         while (this.current_token && this.current_token.type !== 'RBRACE') {
             if (['CONST', 'LET'].includes(this.current_token.type)) {
                 members.push(this.parseClassFieldDeclaration());
@@ -526,7 +526,7 @@ class Parser {
             else if (this.current_token.type === 'DEF') {
                 const methodDef = this.parseFunctionDefinition(true); // is_method = true
                 if (methodDef.name === 'init') {
-                    constructor = methodDef;
+                    ctor = methodDef;
                 }
                 else {
                     methods.push(methodDef);
@@ -537,7 +537,7 @@ class Parser {
             }
         }
         this.eat('RBRACE');
-        return { type: "class_definition", name: className, fields: members, methods: methods, constructor: constructor };
+        return { type: "class_definition", name: className, fields: members, methods: methods, ctor: ctor };
     }
     parseClassFieldDeclaration() {
         const declarationType = this.current_token.type;
@@ -893,8 +893,8 @@ class Interpreter {
         }
         const instance = new PayJarObject(className, instanceFields, instanceMethods);
         // Execute constructor (init method)
-        if (classDefinition.constructor) {
-            const constructorNode = classDefinition.constructor;
+        if (classDefinition.ctor) {
+            const constructorNode = classDefinition.ctor;
             constructorNode.is_method = true;
             const expectedConstructorParams = constructorNode.parameters;
             // Check for 'self' parameter

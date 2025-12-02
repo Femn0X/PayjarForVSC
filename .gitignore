@@ -1,0 +1,73 @@
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# IDE / Editor
+.vscode/
+*.code-workspace
+.idea/
+*.iml
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp.*
+.pnp.js
+dist/
+build/
+out/
+.cache/
+.next/
+.nuxt/
+.vite/
+.vscode-test/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+venv/
+.venv/
+env/
+ENV/
+pip-wheel-metadata/
+*.egg-info/
+build/
+dist/
+
+# Logs
+logs/
+*.log
+
+# Environment / secrets
+.env
+.env.*.local
+secrets.json
+local.settings.json
+
+# Docker
+docker-compose.override.yml
+docker-compose.*.local.yml
+
+# Coverage reports
+coverage/
+coverage.xml
+lcov-report/
+
+# Misc
+*.sqlite3
+*.db
+*.pid
+*.seed
+*.bak
+*.orig
+tmp/
+temp/
+.sass-cache/
+.cache/
